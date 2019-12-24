@@ -72,7 +72,7 @@ void TraceRunner::start(NMPolicy *switch_policy) {
 
   // Start selective connection
   TraceRunner::sTraceRunner = this;
-  sc::start_sc(TraceRunner::on_start_sc, true, false, false);
+  sc::start_sc(TraceRunner::on_start_sc, true, true, false);
 }
 
 // Read trace file and send packets accorting to given workload

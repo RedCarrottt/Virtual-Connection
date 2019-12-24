@@ -30,13 +30,11 @@ using namespace sc;
 
 MonitorLoggingThread *MonitorLoggingThread::sSingleton = NULL;
 
-void MonitorLoggingThread::start(void) {
-  this->start(false);
-}
+void MonitorLoggingThread::start(void) { this->start(false); }
 
 void MonitorLoggingThread::start(bool is_append) {
   this->mIsAppend = is_append;
-  
+
   this->mMonitorLoggingThreadOn = true;
   this->mMonitorLoggingThread =
       new std::thread(std::bind(&MonitorLoggingThread ::logging_thread, this));
@@ -48,8 +46,8 @@ void MonitorLoggingThread::stop(void) { this->mMonitorLoggingThreadOn = false; }
 void MonitorLoggingThread::logging_thread(void) {
   // Open monitor logging file
   FILE *monitor_fp;
-  
-  if(this->mIsAppend) {
+
+  if (this->mIsAppend) {
     monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "a");
   } else {
     monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "w");
@@ -68,10 +66,8 @@ void MonitorLoggingThread::logging_thread(void) {
 
   // Write header of monitor log
   fprintf(monitor_fp,
-          "# Timestamp(sec),"
-          " Inter-arrival Time (ms), Request Size (B),"
-          " Queue Arrival Speed(KB/s), Send Queue Length(KB),"
-          " Bandwidth(KB/s), Latency(ms), BT State, WFD State\n");
+          "# Timestamp(sec), Queue Arrival Speed(KB/s), Send Queue Length(KB),"
+          " Bandwidth(KB/s), BT State, WFD State\n");
 
   // Setting first timeval
   struct timeval first_tv;
@@ -120,15 +116,12 @@ void MonitorLoggingThread::logging_thread(void) {
     }
 
     this->mMeasuredSendRTT.set_value(stats.ema_send_rtt);
-    ::fprintf(monitor_fp,
-              "%ld.%ld, %8.3f, %4d, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %d, %d\n",
+    ::fprintf(monitor_fp, "%ld.%ld, %8.3f, %8.3f, %8.3f, %d, %d\n",
               relative_now_tv_sec, relative_now_tv_usec,
               ((float)stats.ema_arrival_time_us / 1000),
-              (int)stats.ema_send_request_size,
-              ((float)stats.ema_queue_arrival_speed / 1000),
               ((float)stats.now_queue_data_size / 1000),
-              ((float)stats.now_total_bandwidth / 1000),
-              (float)stats.ema_send_rtt, bt_state_code, wfd_state_code);
+              ((float)stats.now_total_bandwidth / 1000), bt_state_code,
+              wfd_state_code);
     ::fflush(monitor_fp);
     ::usleep(250 * 1000);
   }
