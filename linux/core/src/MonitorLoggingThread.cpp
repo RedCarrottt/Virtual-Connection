@@ -118,7 +118,7 @@ void MonitorLoggingThread::logging_thread(void) {
     this->mMeasuredSendRTT.set_value(stats.ema_send_rtt);
     ::fprintf(monitor_fp, "%ld.%ld, %8.3f, %8.3f, %8.3f, %d, %d\n",
               relative_now_tv_sec, relative_now_tv_usec,
-              ((float)stats.ema_arrival_time_us / 1000),
+              ((float)stats.ema_queue_arrival_speed / 1000),
               ((float)stats.now_queue_data_size / 1000),
               ((float)stats.now_total_bandwidth / 1000), bt_state_code,
               wfd_state_code);
