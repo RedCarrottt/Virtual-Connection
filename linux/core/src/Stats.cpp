@@ -33,6 +33,8 @@ void Stats::acquire_values(void) {
 
   /* Now total bandwidth */
   this->now_total_bandwidth = core->get_total_bandwidth();
+  this->now_1st_bandwidth = core->get_nth_bandwidth(0);
+  this->now_2nd_bandwidth = core->get_nth_bandwidth(1);
 
   /* Send request size */
   this->ema_send_request_size = core->get_ema_send_request_size();

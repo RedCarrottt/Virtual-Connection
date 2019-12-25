@@ -26,11 +26,10 @@ public:
   /* Statistics used to print present status (B/s) */
   float ema_queue_arrival_speed = 0;
 
-  /* Statistics used in CoolSpots Policy */
   int now_total_bandwidth = 0;
+  int now_1st_bandwidth = 0;
+  int now_2nd_bandwidth = 0;
   float ema_media_rtt = 0;
-
-  /* Statistics used in switch policies */
   float ema_send_request_size = 0;
   float ema_arrival_time_us = 0;
   int now_queue_data_size = 0; // Bytes

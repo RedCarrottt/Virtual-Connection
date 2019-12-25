@@ -28,8 +28,8 @@
 #include "SegmentManager.h"
 #include "ServerAdapter.h"
 
-#include "../../common/inc/Counter.h"
 #include "../../common/inc/ArrivalTimeCounter.h"
+#include "../../common/inc/Counter.h"
 
 #include <mutex>
 #include <stdint.h>
@@ -144,6 +144,16 @@ public:
     }
     return now_total_bandwidth;
   }
+  int get_nth_bandwidth(int index) {
+    ServerAdapter *adapter = this->get_adapter(index);
+    if (adapter == NULL)
+      return 0;
+    int bandwidth_up = adapter->get_bandwidth_up();
+    int bandwidth_down = adapter->get_bandwidth_down();
+    return bandwidth_up + bandwidth_down;
+    int num_adapters = 0;
+    int now_total_bandwidth = 0;
+  }
   float get_ema_send_request_size() {
     return this->mSendRequestSize.get_em_average();
   }
@@ -158,7 +168,9 @@ public:
 
   float get_ema_media_rtt() { return this->mMediaRTT.get_em_average(); }
 
-  void set_media_rtt(int media_rtt) { this->mMediaRTT.set_value(media_rtt / 1000); }
+  void set_media_rtt(int media_rtt) {
+    this->mMediaRTT.set_value(media_rtt / 1000);
+  }
 
   float get_average_send_rtt() { return this->mSendRTT.get_total_average(); }
 

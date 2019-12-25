@@ -25,6 +25,8 @@
 #include "../../common/inc/Counter.h"
 #include "../../common/inc/DebugLog.h"
 
+#include "../../configs/ExpConfig.h"
+
 #include <condition_variable>
 #include <list>
 #include <mutex>
@@ -47,6 +49,7 @@ public:
       this->mQueueLength.increase();
       continuous_segment_enqueued = true;
     } else {
+#ifdef EXP_CONTROL_SEGQUEUE
       /*
        * If the sequence number is not the next expected one,
        * it enqueues its segments to the pending queue, not normal queue.
@@ -56,6 +59,7 @@ public:
                 this->mExpectedSeqNo);
       }
       assert(seg->seq_no > this->mExpectedSeqNo);
+#endif
 
       std::list<Segment *>::iterator curr_it = this->mPendingQueue.begin();
 
