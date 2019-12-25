@@ -31,7 +31,7 @@ class MonitorLoggingThread {
 public:
   /* Control this thread */
   void start(void);
-  void start(bool is_append);
+  void start(bool is_logging, bool is_append);
   void stop(void);
 
 private:
@@ -45,6 +45,7 @@ public:
   }
 
 private:
+  bool mIsLogging = false;
   bool mIsAppend = false;
   Counter mMeasuredSendRTT;
 

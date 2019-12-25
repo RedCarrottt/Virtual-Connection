@@ -44,17 +44,17 @@ void sc::start_sc(StartCallback startCallback) {
   sc::start_sc(startCallback, true, true, false);
 }
 
-void sc::start_sc(StartCallback startCallback, bool is_monitor, bool is_logging, bool is_append) {
+void sc::start_sc(StartCallback startCallback, bool is_monitor, bool is_logging,
+                  bool is_append) {
   // Core start procedure
   g_is_start_sc_done = false;
   Core::singleton()->start();
-  if(is_monitor) {
+  if (is_monitor) {
     NetworkMonitorThread::singleton()->start();
   }
-  if(is_logging) {
-    MonitorLoggingThread::singleton()->start(is_append);
-    EventLogging::initialize();
-  }
+  
+  MonitorLoggingThread::singleton()->start(is_logging, is_append);
+  EventLogging::initialize();
 
   // Wait until core start thread ends
   if (!g_is_start_sc_done) {
@@ -82,10 +82,10 @@ void sc::stop_sc(StopCallback stopCallback) {
 void sc::stop_sc(StopCallback stopCallback, bool is_monitor, bool is_logging) {
   // Core stop procedure
   g_is_stop_sc_done = false;
-  if(is_monitor) {
+  if (is_monitor) {
     sc::stop_monitoring();
   }
-  if(is_logging) {
+  if (is_logging) {
     sc::stop_logging();
     Core::singleton()->stop();
   }
@@ -112,10 +112,10 @@ void sc::stop_monitoring(void) { NetworkMonitorThread::singleton()->stop(); }
 
 void sc::stop_logging(void) { MonitorLoggingThread::singleton()->stop(); }
 
-void sc::set_nm_policy(NMPolicy* nm_policy) {
+void sc::set_nm_policy(NMPolicy *nm_policy) {
   NetworkMonitorThread::singleton()->set_policy(nm_policy);
 }
 
-NMPolicy* sc::get_nm_policy(void) {
+NMPolicy *sc::get_nm_policy(void) {
   return NetworkMonitorThread::singleton()->get_policy();
 }

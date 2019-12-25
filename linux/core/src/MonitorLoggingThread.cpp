@@ -30,9 +30,10 @@ using namespace sc;
 
 MonitorLoggingThread *MonitorLoggingThread::sSingleton = NULL;
 
-void MonitorLoggingThread::start(void) { this->start(false); }
+void MonitorLoggingThread::start(void) { this->start(false, false); }
 
-void MonitorLoggingThread::start(bool is_append) {
+void MonitorLoggingThread::start(bool is_logging, bool is_append) {
+  this->mIsLogging = is_logging;
   this->mIsAppend = is_append;
 
   this->mMonitorLoggingThreadOn = true;
@@ -47,27 +48,30 @@ void MonitorLoggingThread::logging_thread(void) {
   // Open monitor logging file
   FILE *monitor_fp;
 
-  if (this->mIsAppend) {
-    monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "a");
-  } else {
-    monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "w");
+  if (this->mIsLogging) {
+    // Prepare for logging
+    if (this->mIsAppend) {
+      monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "a");
+    } else {
+      monitor_fp = ::fopen(MONITOR_LOG_FILE_NAME, "w");
+    }
+    if (monitor_fp == NULL) {
+      LOG_ERR("Failed to open monitor log file");
+      return;
+    } else {
+      // Prevent file descriptor inheritance
+      int fd = fileno(monitor_fp);
+      int fd_flag = fcntl(fd, F_GETFD, 0);
+      fd_flag |= FD_CLOEXEC;
+      fcntl(fd, F_SETFD, fd_flag);
+    }
+
+    // Write header of monitor log
+    fprintf(
+        monitor_fp,
+        "# Timestamp(sec), Queue Arrival Speed(KB/s), Send Queue Length(KB),"
+        " Bandwidth(KB/s), BT State, WFD State\n");
   }
-
-  if (monitor_fp == NULL) {
-    LOG_ERR("Failed to open monitor log file");
-    return;
-  }
-
-  // Prevent file descriptor inheritance
-  int fd = fileno(monitor_fp);
-  int fd_flag = fcntl(fd, F_GETFD, 0);
-  fd_flag |= FD_CLOEXEC;
-  fcntl(fd, F_SETFD, fd_flag);
-
-  // Write header of monitor log
-  fprintf(monitor_fp,
-          "# Timestamp(sec), Queue Arrival Speed(KB/s), Send Queue Length(KB),"
-          " Bandwidth(KB/s), BT State, WFD State\n");
 
   // Setting first timeval
   struct timeval first_tv;
@@ -87,6 +91,10 @@ void MonitorLoggingThread::logging_thread(void) {
     long long relative_now_tv_us = now_tv_us - first_tv_us;
     int relative_now_tv_sec = (int)(relative_now_tv_us) / (1000 * 1000);
     int relative_now_tv_usec = (int)(relative_now_tv_us) % (1000 * 1000);
+
+    // Update segmenet manager's stats
+    SegmentManager *sm = SegmentManager::singleton();
+    sm->update_queue_arrival_speed();
 
     // Get EMA send RTT
     Stats stats;
@@ -116,15 +124,19 @@ void MonitorLoggingThread::logging_thread(void) {
     }
 
     this->mMeasuredSendRTT.set_value(stats.ema_send_rtt);
-    ::fprintf(monitor_fp, "%ld.%ld, %8.3f, %8.3f, %8.3f, %d, %d\n",
-              relative_now_tv_sec, relative_now_tv_usec,
-              ((float)stats.ema_queue_arrival_speed / 1000),
-              ((float)stats.now_queue_data_size / 1000),
-              ((float)stats.now_total_bandwidth / 1000), bt_state_code,
-              wfd_state_code);
-    ::fflush(monitor_fp);
+    if (this->mIsLogging) {
+      ::fprintf(monitor_fp, "%ld.%ld, %8.3f, %8.3f, %8.3f, %d, %d\n",
+                relative_now_tv_sec, relative_now_tv_usec,
+                ((float)stats.ema_queue_arrival_speed / 1000),
+                ((float)stats.now_queue_data_size / 1000),
+                ((float)stats.now_total_bandwidth / 1000), bt_state_code,
+                wfd_state_code);
+      ::fflush(monitor_fp);
+    }
     ::usleep(250 * 1000);
   }
-
-  ::fclose(monitor_fp);
+  
+  if (this->mIsLogging) {
+    ::fclose(monitor_fp);
+  }
 }

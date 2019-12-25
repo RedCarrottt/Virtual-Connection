@@ -47,10 +47,6 @@ void NetworkMonitorThread::stop(void) { this->mMonitorThreadOn = false; }
 void NetworkMonitorThread::monitor_thread(void) {
   int count = 0;
   while (this->mMonitorThreadOn) {
-    // Update segmenet manager's stats
-    SegmentManager *sm = SegmentManager::singleton();
-    sm->update_queue_arrival_speed();
-
     // Get statistics
     Stats stats;
     stats.acquire_values();

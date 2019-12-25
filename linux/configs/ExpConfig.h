@@ -1,6 +1,6 @@
 /* Copyright 2017-2018 All Rights Reserved.
  *  Gyeonghwan Hong (redcarrottt@gmail.com)
- *  
+ *
  * [Contact]
  *  Gyeonghwan Hong (redcarrottt@gmail.com)
  *
@@ -32,9 +32,6 @@
 // #define VERBOSE_ENQUEUE_SEND
 // #define VERBOSE_ENQUEUE_RECV
 // #define VERBOSE_RECEIVE_ACK
-// #define EXP_DONT_SEND_CONNECT_CONTROL_MESSAGE
-// #define EXP_DONT_SEND_PRIV_CONTROL_MESSAGE
-// #define EXP_RECONNECT_ADAPTER_ENABLED
 // #define VERBOSE_CONTROL_RAW_MESSAGE
 #define VERBOSE_CHILD_PROCESS_RUN
 
@@ -43,5 +40,10 @@
 // #define VERBOSE_DEALLOCATE_SENT_SEGMENTS
 
 // #ifdef VERBOSE_BLUETOOTH_THROTTLING
+
+// #define EXP_DONT_SEND_CONNECT_CONTROL_MESSAGE
+// #define EXP_DONT_SEND_PRIV_CONTROL_MESSAGE
+// #define EXP_RECONNECT_ADAPTER_ENABLED
+#define EXP_CONTROL_SEGQUEUE
 
 #endif /* !defined(__EXP_CONFIG_H__) */

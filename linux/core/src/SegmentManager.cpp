@@ -106,22 +106,20 @@ int SegmentManager::send_to_segment_manager(uint8_t *data, size_t len,
     memcpy(seg->data + kSegHeaderSize, data + offset, seg_len);
     offset += seg_len;
 
+#ifdef VERBOSE_ENQUEUE_SEND
+    LOG_DEBUG(
+        "Enqueue(control) IsControl: %d / SeqNo: %lu / len: %d / TS: %ld.%ld",
+        is_control, seg->seq_no, len, send_start_ts.tv_sec,
+        send_start_ts.tv_usec);
+#endif
+    sc::SegQueueType queueType = kSQSendData;
+#ifdef EXP_CONTROL_SEGQUEUE
     if (is_control) {
-#ifdef VERBOSE_ENQUEUE_SEND
-      LOG_DEBUG(
-          "Enqueue(control) IsControl: %d / SeqNo: %lu / len: %d / TS: %ld.%ld",
-          is_control, seg->seq_no, len, send_start_ts.tv_sec,
-          send_start_ts.tv_usec);
-#endif
-      this->enqueue(kSQSendControl, seg);
-    } else {
-#ifdef VERBOSE_ENQUEUE_SEND
-      LOG_DEBUG("Enqueue(data) IsControl: %d / SeqNo: %lu / TS: %ld.%ld",
-                is_control, seg->seq_no, send_start_ts.tv_sec,
-                send_start_ts.tv_usec);
-#endif
-      this->enqueue(kSQSendData, seg);
+      queueType = kSQSendControl;
     }
+#endif
+
+    this->enqueue(queueType, seg);
   }
 
   return 0;
